@@ -21,7 +21,5 @@ else()
 endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
-include_directories(BEFORE SYSTEM
-    $ENV{GEODE_SDK}/loader/include
-)
+
 setup_geode_mod(${PROJECT_NAME})
