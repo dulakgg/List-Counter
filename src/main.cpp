@@ -12,7 +12,7 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
         std::vector<int> m_listIds;
         bool m_failed = false;
         bool m_alertLoadingShown = false;
-        FLAlertLayer* m_alert = nullptr;
+        Ref<FLAlertLayer> m_alert;
     };
 
     bool init(GJGameLevel* level, bool challenge) {
