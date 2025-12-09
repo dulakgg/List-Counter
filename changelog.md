@@ -1,3 +1,6 @@
+# 1.0.3
+- Fixed game crashing when the api stops working
+
 # 1.0.2
 - Added list of lists id's the level appears in
 
