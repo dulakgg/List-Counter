@@ -1,3 +1,7 @@
+# 1.0.4
+- Auto refresh the popup when loaded
+- Don't make a call on every level opened just the button clicked
+
 # 1.0.3
 - Fixed game crashing when the api stops working
 

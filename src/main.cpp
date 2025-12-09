@@ -11,6 +11,8 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
         int m_count = -1;
         std::vector<int> m_listIds;
         bool m_failed = false;
+        bool m_alertLoadingShown = false;
+        FLAlertLayer* m_alert = nullptr;
     };
 
     bool init(GJGameLevel* level, bool challenge) {
@@ -25,8 +27,6 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
             leftMenu->addChild(btn);
             leftMenu->updateLayout();
         }
-
-        downloadLevelCount(level);
         return true;
     }
 
@@ -79,13 +79,23 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
                 this->m_fields->m_failed = true;
                 this->m_fields->m_count = -1;
                 this->m_fields->m_listIds.clear();
-                return;
+                queueInMainThread([this] { this->onListCounterButton(nullptr); });
             }
 
             // there is no space on level info layer to fit this label :sob: lmao
             auto text = std::string("Lists: ") + std::to_string(count);
             this->m_fields->m_count = count;
             this->m_fields->m_listIds = std::move(listIds);
+            if (this->m_fields->m_alertLoadingShown) {
+                this->m_fields->m_alertLoadingShown = false;
+                queueInMainThread([this] {
+                    if (this->m_fields->m_alert) {
+                        this->m_fields->m_alert->removeFromParentAndCleanup(true);
+                        this->m_fields->m_alert = nullptr;
+                    }
+                    this->onListCounterButton(nullptr);
+                });
+            }
         });
         auto req = web::WebRequest();
         this->m_fields->m_listener.setFilter(req.get(url));
@@ -98,7 +108,11 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
         if (this->m_fields->m_failed) {
             msg = "Error loading lists. Try again later.";
         } else if (count < 0) {
-            msg = "Wait a second";
+            msg = "Loading...";
+            if (this->m_level) {
+                this->downloadLevelCount(this->m_level);
+            }
+            this->m_fields->m_alertLoadingShown = true;
         } else {
             // i will be making id's clickable (some day :sob:)
             msg = std::string("Lists: ") + std::to_string(count);
@@ -112,6 +126,8 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
                 msg += "\nIDs: None";
             }
         }
-        FLAlertLayer::create("List Counter", msg.c_str(), "OK")->show();
+        auto alert = FLAlertLayer::create("List Counter", msg.c_str(), "OK");
+        alert->show();
+        this->m_fields->m_alert = alert;
     }
 };
