@@ -8,15 +8,22 @@
 	},
 	"id": "dulak.list_counter",
 	"name": "List Counter",
-	"version": "v1.0.5",
+	"version": "v2.0.0",
 	"developer": "dulak",
-	"description": "Counts in how many rated lists a level is in",
+	"description": "Counts in how many lists a level is in",
 	"dependencies": {
 		"geode.node-ids": ">=v1.20.0"
 	},
 	"tags": [
 		"interface", "online", "utility"
 	],
+	"settings": {
+		"unrated": {
+			"name": "inlude unrated lists",
+			"type": "bool",
+			"default": false
+		}
+	},
 	"links": {
         "source": "https://github.com/dulakgg/List-Counter"
     }

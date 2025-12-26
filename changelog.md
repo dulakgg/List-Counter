@@ -1,3 +1,6 @@
+# 2.0.0
+- Added optional include unrated lists.
+
 # 1.0.5
 - Fixed a crash when closing the popup during loading thanks to hiimjasmine00 <3
 

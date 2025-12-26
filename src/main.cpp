@@ -1,10 +1,10 @@
 #include <Geode/Geode.hpp>
 #include <Geode/utils/web.hpp>
-#include <Geode/loader/Event.hpp>
+#include <Geode/loader/Event.hpp> 
 #include <matjson.hpp>
+
 using namespace geode::prelude;
 
-#include <Geode/modify/LevelInfoLayer.hpp>
 class $modify(MyLevelInfoLayer, LevelInfoLayer) {
     struct Fields {
         EventListener<web::WebTask> m_listener;
@@ -33,7 +33,11 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
     void downloadLevelCount(GJGameLevel* level) {
         if (!level) return;
         int levelId = level->m_levelID;
-        auto url = std::string("https://ihaveawebsiteidea.com/lists/levelnumber/") + std::to_string(levelId); // don't hate it's a random domain i have no usage of
+        bool includeUnrated = Mod::get()->getSettingValue<bool>("unrated");
+        auto url = std::string("https://ihaveawebsiteidea.com/lists/levelcount/") + std::to_string(levelId); // don't hate it's a random domain i have no usage of
+        if(includeUnrated){
+            url = std::string("https://ihaveawebsiteidea.com/alllists/levelcount/") + std::to_string(levelId); // don't hate it's a random domain i have no usage of
+        }
 
         this->m_fields->m_listener.bind([this](web::WebTask::Event* e) {
             this->m_fields->m_failed = false;
