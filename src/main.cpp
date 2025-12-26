@@ -40,23 +40,24 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
             url = std::string("https://ihaveawebsiteidea.com/alllists/levelcount/") + std::to_string(levelId); // don't hate it's a random domain i have no usage of
         }
 
-        this->m_fields->m_listener.bind([this](web::WebTask::Event* e) {
-            this->m_fields->m_failed = false;
+        this->m_fields->m_listener.bind([self = Ref(this)](web::WebTask::Event* e) {
+            if (!self) return;
+
+            self->m_fields->m_failed = false;
 
             auto* res = e->getValue();
             if (!res) {
-                this->m_fields->m_failed = true;
-                this->m_fields->m_count = -1;
-                this->m_fields->m_listIds.clear();
+                self->m_fields->m_failed = true;
+                self->m_fields->m_count = -1;
+                self->m_fields->m_listIds.clear();
                 return;
             }
 
-            auto body = res->string().unwrapOr("");
-            auto parsed = matjson::parse(body);
+            auto parsed = res->json();
             if (!parsed.isOk()) {
-                this->m_fields->m_failed = true;
-                this->m_fields->m_count = -1;
-                this->m_fields->m_listIds.clear();
+                self->m_fields->m_failed = true;
+                self->m_fields->m_count = -1;
+                self->m_fields->m_listIds.clear();
                 return;
             }
 
@@ -81,24 +82,26 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
                     }
                 }
             } else {
-                this->m_fields->m_failed = true;
-                this->m_fields->m_count = -1;
-                this->m_fields->m_listIds.clear();
-                queueInMainThread([this] { this->onListCounterButton(nullptr); });
+                self->m_fields->m_failed = true;
+                self->m_fields->m_count = -1;
+                self->m_fields->m_listIds.clear();
+                queueInMainThread([self] {
+                    if (!self) return;
+                    self->onListCounterButton(nullptr);
+                });
             }
 
-            // there is no space on level info layer to fit this label :sob: lmao
-            auto text = std::string("Lists: ") + std::to_string(count);
-            this->m_fields->m_count = count;
-            this->m_fields->m_listIds = std::move(listIds);
-            if (this->m_fields->m_alertLoadingShown) {
-                this->m_fields->m_alertLoadingShown = false;
-                queueInMainThread([this] {
-                    if (this->m_fields->m_alert) {
-                        this->m_fields->m_alert->removeFromParentAndCleanup(true);
-                        this->m_fields->m_alert = nullptr;
+            self->m_fields->m_count = count;
+            self->m_fields->m_listIds = std::move(listIds);
+            if (self->m_fields->m_alertLoadingShown) {
+                self->m_fields->m_alertLoadingShown = false;
+                queueInMainThread([self] {
+                    if (!self) return;
+                    if (self->m_fields->m_alert) {
+                        self->m_fields->m_alert->removeFromParentAndCleanup(true);
+                        self->m_fields->m_alert = nullptr;
                     }
-                    this->onListCounterButton(nullptr);
+                    self->onListCounterButton(nullptr);
                 });
             }
         });
@@ -123,10 +126,15 @@ class $modify(MyLevelInfoLayer, LevelInfoLayer) {
             msg = std::string("Lists: ") + std::to_string(count);
             if (!ids.empty()) {
                 msg += "\nIDs: ";
-                for (size_t i = 0; i < ids.size(); ++i) {
-                    msg += std::to_string(ids[i]);
-                    if (i + 1 < ids.size()) msg += ", ";
+                if( ids.size() > 30 ) {
+                    msg += "\ntoo many id's too show"; // i'll be making a page system soon trust
+                } else {
+                    for (size_t i = 0; i < ids.size(); ++i) {
+                        msg += std::to_string(ids[i]);
+                        if (i + 1 < ids.size()) msg += ", ";
+                    }
                 }
+                
             } else {
                 msg += "\nIDs: None";
             }
