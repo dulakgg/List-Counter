@@ -2,6 +2,7 @@
 #include <Geode/utils/web.hpp>
 #include <Geode/loader/Event.hpp> 
 #include <matjson.hpp>
+#include <Geode/modify/LevelInfoLayer.hpp>
 
 using namespace geode::prelude;
 
